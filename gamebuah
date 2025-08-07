@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Tebak Buah</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255,255,255,0.1) 10px,
+                rgba(255,255,255,0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%);
+            }
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-content {
+            padding: 30px;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .start-screen p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .difficulty-selector {
+            margin: 25px 0;
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(243, 104, 224, 0.3);
+        }
+
+        .difficulty-btn.selected {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .game-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            background: #f8f9ff;
+            padding: 15px 20px;
+            border-radius: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .fruit-display {
+            background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 25px;
+            border: 3px dashed #ff6b6b;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fruit-emoji {
+            font-size: 8em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .fruit-hint {
+            color: #666;
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.3em;
+            border: 3px solid #e1e5e9;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: white;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #26de81, #20bf6b);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(32, 191, 107, 0.3);
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, #ffa502, #ff6348);
+        }
+
+        .skip-btn:hover {
+            box-shadow: 0 8px 20px rgba(255, 99, 72, 0.3);
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #3742fa, #2f3542);
+        }
+
+        .hint-btn:hover {
+            box-shadow: 0 8px 20px rgba(55, 66, 250, 0.3);
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            animation: feedbackPop 0.6s ease-out;
+        }
+
+        @keyframes feedbackPop {
+            0% {
+                transform: scale(0.8);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #26de81, #20bf6b);
+            color: white;
+        }
+
+        .feedback.wrong {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .final-score {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-text {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .result-message {
+            color: #ff6b6b;
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .final-stat {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .final-stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .final-stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2em;
+            }
+            
+            .fruit-emoji {
+                font-size: 6em;
+            }
+            
+            .game-content {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🍎 TEBAK BUAH</h1>
+            <p class="game-subtitle">Ayo tebak nama buahnya!</p>
+        </div>
+
+        <div class="game-content">
+            <!-- Start Screen -->
+            <div class="start-screen" id="startScreen">
+                <h2>Selamat Datang di Game Tebak Buah!</h2>
+                <p>Lihat emoji buah dan tebak nama buahnya dengan benar. Semakin banyak benar, semakin tinggi skormu!</p>
+                
+                <div class="difficulty-selector">
+                    <p style="margin-bottom: 15px; color: #666;"><strong>Pilih Tingkat Kesulitan:</strong></p>
+                    <button class="difficulty-btn selected" onclick="selectDifficulty('mudah', this)">
+                        😊 Mudah (10 Soal)
+                    </button>
+                    <button class="difficulty-btn" onclick="selectDifficulty('sedang', this)">
+                        🤔 Sedang (15 Soal)
+                    </button>
+                    <button class="difficulty-btn" onclick="selectDifficulty('sulit', this)">
+                        😤 Sulit (20 Soal)
+                    </button>
+                </div>
+                
+                <button class="btn" onclick="startGame()">🎮 Mulai Main</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div class="game-screen" id="gameScreen">
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentQuestion">1</div>
+                        <div class="stat-label">Soal</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="currentScore">0</div>
+                        <div class="stat-label">Skor</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="hintsLeft">3</div>
+                        <div class="stat-label">Petunjuk</div>
+                    </div>
+                </div>
+
+                <div class="fruit-display">
+                    <div class="fruit-emoji" id="fruitEmoji">🍎</div>
+                    <div class="fruit-hint" id="fruitHint">Buah merah yang manis...</div>
+                </div>
+
+                <input 
+                    type="text" 
+                    class="answer-input" 
+                    id="answerInput" 
+                    placeholder="Ketik nama buahnya di sini..."
+                    onkeypress="handleKeyPress(event)"
+                />
+
+                <div class="button-group">
+                    <button class="action-btn" onclick="checkAnswer()">
+                        ✅ Jawab
+                    </button>
+                    <button class="action-btn hint-btn" onclick="showHint()" id="hintBtn">
+                        💡 Petunjuk
+                    </button>
+                    <button class="action-btn skip-btn" onclick="skipQuestion()">
+                        ⏭️ Lewati
+                    </button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <!-- Result Screen -->
+            <div class="result-screen" id="resultScreen">
+                <div class="result-card">
+                    <div class="final-score" id="finalScore">0</div>
+                    <div class="score-text">Skor Akhir</div>
+                </div>
+
+                <div class="result-message" id="resultMessage"></div>
+
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalCorrect">0</div>
+                        <div class="final-stat-label">Benar</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalWrong">0</div>
+                        <div class="final-stat-label">Salah</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalSkipped">0</div>
+                        <div class="final-stat-label">Dilewati</div>
+                    </div>
+                    <div class="final-stat">
+                        <div class="final-stat-value" id="finalAccuracy">0%</div>
+                        <div class="final-stat-label">Akurasi</div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="restartGame()">🔄 Main Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database buah
+        const fruits = [
+            { emoji: "🍎", name: "apel", hint: "Buah merah atau hijau yang renyah", difficulty: "mudah" },
+            { emoji: "🍌", name: "pisang", hint: "Buah kuning yang melengkung", difficulty: "mudah" },
+            { emoji: "🍊", name: "jeruk", hint: "Buah bulat berwarna oranye", difficulty: "mudah" },
+            { emoji: "🍇", name: "anggur", hint: "Buah kecil yang bergerombol", difficulty: "mudah" },
+            { emoji: "🍓", name: "stroberi", hint: "Buah merah dengan bintik-bintik kecil", difficulty: "mudah" },
+            { emoji: "🥝", name: "kiwi", hint: "Buah hijau dengan kulit berbulu", difficulty: "sedang" },
+            { emoji: "🍑", name: "ceri", hint: "Buah merah kecil dengan tangkai", difficulty: "sedang" },
+            { emoji: "🍒", name: "ceri", hint: "Buah merah kecil yang berpasangan", difficulty: "sedang" },
+            { emoji: "🍅", name: "tomat", hint: "Buah merah yang sering dianggap sayuran", difficulty: "mudah" },
+            { emoji: "🥭", name: "mangga", hint: "Buah tropis berwarna kuning-oranye", difficulty: "mudah" },
+            { emoji: "🍍", name: "nanas", hint: "Buah dengan mahkota daun di atasnya", difficulty: "mudah" },
+            { emoji: "🥥", name: "kelapa", hint: "Buah dengan tempurung keras", difficulty: "sedang" },
+            { emoji: "🍈", name: "melon", hint: "Buah bulat dengan daging hijau atau oranye", difficulty: "sedang" },
+            { emoji: "🍉", name: "semangka", hint: "Buah besar dengan kulit hijau bergaris", difficulty: "mudah" },
+            { emoji: "🍋", name: "lemon", hint: "Buah kuning yang asam", difficulty: "sedang" },
+            { emoji: "🍐", name: "pir", hint: "Buah hijau atau kuning berbentuk seperti bola lampu", difficulty: "sedang" },
+            { emoji: "🥑", name: "alpukat", hint: "Buah hijau dengan daging lembut dan biji besar", difficulty: "sedang" },
+            { emoji: "🍑", name: "persik", hint: "Buah berbulu dengan daging manis", difficulty: "sulit" },
+            { emoji: "🫐", name: "blueberry", hint: "Buah kecil biru yang manis", difficulty: "sulit" },
+            { emoji: "🥭", name: "pepaya", hint: "Buah tropis dengan biji hitam di tengah", difficulty: "sulit" }
+        ];
+
+        let currentFruit = null;
+        let score = 0;
+        let questionCount = 0;
+        let correctAnswers = 0;
+        let wrongAnswers = 0;
+        let skippedQuestions = 0;
+        let hintsUsed = 0;
+        let totalHints = 3;
+        let difficulty = 'mudah';
+        let maxQuestions = 10;
+        let gameQuestions = [];
+
+        function selectDifficulty(level, button) {
+            difficulty = level;
+            
+            // Remove selected class from all buttons
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            button.classList.add('selected');
+            
+            // Set max questions based on difficulty
+            switch(level) {
+                case 'mudah':
+                    maxQuestions = 10;
+                    totalHints = 3;
+                    break;
+                case 'sedang':
+                    maxQuestions = 15;
+                    totalHints = 2;
+                    break;
+                case 'sulit':
+                    maxQuestions = 20;
+                    totalHints = 1;
+                    break;
+            }
+        }
+
+        function startGame() {
+            // Reset game state
+            score = 0;
+            questionCount = 0;
+            correctAnswers = 0;
+            wrongAnswers = 0;
+            skippedQuestions = 0;
+            hintsUsed = 0;
+            
+            // Filter fruits based on difficulty and create question pool
+            let availableFruits = [];
+            switch(difficulty) {
+                case 'mudah':
+                    availableFruits = fruits.filter(f => f.difficulty === 'mudah');
+                    break;
+                case 'sedang':
+                    availableFruits = fruits.filter(f => f.difficulty === 'mudah' || f.difficulty === 'sedang');
+                    break;
+                case 'sulit':
+                    availableFruits = [...fruits];
+                    break;
+            }
+            
+            // Shuffle and select fruits for the game
+            gameQuestions = shuffleArray(availableFruits).slice(0, maxQuestions);
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('hintsLeft').textContent = totalHints;
+            
+            nextQuestion();
+        }
+
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function nextQuestion() {
+            if (questionCount >= maxQuestions) {
+                endGame();
+                return;
+            }
+
+            currentFruit = gameQuestions[questionCount];
+            questionCount++;
+            
+            document.getElementById('fruitEmoji').textContent = currentFruit.emoji;
+            document.getElementById('fruitHint').textContent = '🤔 Buah apakah ini?';
+            document.getElementById('currentQuestion').textContent = `${questionCount}/${maxQuestions}`;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').classList.remove('show');
+            
+            // Update hint button
+            const hintBtn = document.getElementById('hintBtn');
+            if (totalHints - hintsUsed <= 0) {
+                hintBtn.disabled = true;
+                hintBtn.style.opacity = '0.5';
+                hintBtn.textContent = '💡 Petunjuk (0)';
+            } else {
+                hintBtn.disabled = false;
+                hintBtn.style.opacity = '1';
+                hintBtn.textContent = `💡 Petunjuk (${totalHints - hintsUsed})`;
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
+            const feedback = document.getElementById('feedback');
+            
+            if (!userAnswer) {
+                showFeedback('Masukkan jawaban terlebih dahulu!', 'wrong');
+                return;
+            }
+            
+            if (userAnswer === currentFruit.name.toLowerCase()) {
+                // Correct answer
+                let points = 100;
+                if (difficulty === 'sedang') points = 150;
+                if (difficulty === 'sulit') points = 200;
+                
+                score += points;
+                correctAnswers++;
+                showFeedback(`🎉 Benar! +${points} poin`, 'correct');
+                
+                setTimeout(nextQuestion, 2000);
+            } else {
+                // Wrong answer
+                wrongAnswers++;
+                showFeedback(`❌ Salah! Jawaban yang benar: ${currentFruit.name}`, 'wrong');
+                
+                setTimeout(nextQuestion, 3000);
+            }
+            
+            document.getElementById('currentScore').textContent = score;
+        }
+
+        function showHint() {
+            if (hintsUsed >= totalHints) return;
+            
+            hintsUsed++;
+            document.getElementById('fruitHint').textContent = currentFruit.hint;
+            document.getElementById('hintsLeft').textContent = totalHints - hintsUsed;
+            
+            const hintBtn = document.getElementById('hintBtn');
+            if (totalHints - hintsUsed <= 0) {
+                hintBtn.disabled = true;
+                hintBtn.style.opacity = '0.5';
+                hintBtn.textContent = '💡 Petunjuk (0)';
+            } else {
+                hintBtn.textContent = `💡 Petunjuk (${totalHints - hintsUsed})`;
+            }
+        }
+
+        function skipQuestion() {
+            skippedQuestions++;
+            showFeedback(`⏭️ Dilewati! Jawabannya: ${currentFruit.name}`, 'wrong');
+            
+            setTimeout(nextQuestion, 2500);
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type} show`;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            // Calculate accuracy
+            const totalAnswered = correctAnswers + wrongAnswers;
+            const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
+            
+            // Update final stats
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCorrect').textContent = correctAnswers;
+            document.getElementById('finalWrong').textContent = wrongAnswers;
+            document.getElementById('finalSkipped').textContent = skippedQuestions;
+            document.getElementById('finalAccuracy').textContent = accuracy + '%';
+            
+            // Set result message
+            let message = '';
+            if (accuracy >= 90) {
+                message = '🏆 Luar Biasa! Kamu Master Buah!';
+            } else if (accuracy >= 75) {
+                message = '🌟 Hebat! Pengetahuan buahmu sangat baik!';
+            } else if (accuracy >= 60) {
+                message = '👍 Bagus! Terus belajar ya!';
+            } else if (accuracy >= 40) {
+                message = '😊 Tidak buruk! Coba lagi untuk hasil lebih baik!';
+            } else {
+                message = '💪 Jangan menyerah! Mari belajar lebih banyak tentang buah!';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        // Initialize the game
+        document.getElementById('answerInput').focus();
+    </script>
+</body>
+</html>
